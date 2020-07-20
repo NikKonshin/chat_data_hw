@@ -57,7 +57,7 @@ public class ClientHandler {
 
                         if (str.startsWith("/reg ")) {
                             String[] token = str.split("\\s");
-                            if (token.length < 4) {
+                            if (token.length < 5) {
                                 continue;
                             }
                             boolean b = server.getAuthService()

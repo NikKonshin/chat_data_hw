@@ -3,12 +3,17 @@ package server;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.sql.*;
 import java.util.List;
 import java.util.Vector;
+
+import static server.DbSimpleAuthService.*;
 
 public class Server {
     private List<ClientHandler> clients;
     private AuthService authService;
+    private DbSimpleAuthService dbSAS;
+
 
     public AuthService getAuthService() {
         return authService;
@@ -16,7 +21,8 @@ public class Server {
 
     public Server() {
         clients = new Vector<>();
-        authService = new SimpleAuthService();
+        authService = new DbSimpleAuthService();
+
 
         ServerSocket server = null;
         Socket socket;
@@ -26,9 +32,17 @@ public class Server {
         try {
             server = new ServerSocket(PORT);
             System.out.println("Сервер запущен!");
+            //fillTable();
 
             while (true) {
                 socket = server.accept();
+                try {
+                    connect();
+                } catch (ClassNotFoundException e) {
+                    e.printStackTrace();
+                } catch (SQLException throwables) {
+                    throwables.printStackTrace();
+                }
                 System.out.println("Клиент подключился");
                 System.out.println("socket.getRemoteSocketAddress(): " + socket.getRemoteSocketAddress());
                 System.out.println("socket.getLocalSocketAddress() " + socket.getLocalSocketAddress());
@@ -37,8 +51,10 @@ public class Server {
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
+            disconnect();
             try {
                 server.close();
+
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -99,5 +115,7 @@ public class Server {
             c.sendMsg(msg);
         }
     }
+
+
 
 }
