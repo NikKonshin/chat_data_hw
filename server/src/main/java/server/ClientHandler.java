@@ -57,7 +57,7 @@ public class ClientHandler {
 
                         if (str.startsWith("/reg ")) {
                             String[] token = str.split("\\s");
-                            if (token.length < 5) {
+                            if (token.length < 4) {
                                 continue;
                             }
                             boolean b = server.getAuthService()
@@ -88,6 +88,22 @@ public class ClientHandler {
                                 }
 
                                 server.privateMsg(this, token[1], token[2]);
+                            }
+
+                            if (str.startsWith("/chnick")){
+                                String[] token = str.split("\\s", 2);
+                                if(token[1].contains(" ")){
+                                    sendMsg("Ник не может содержать пробелов");
+                                continue;
+                                }
+                                if (server.getAuthService().changeNick(this.nick,token[1])){
+                                    sendMsg("/younickis " + token[1]);
+                                    sendMsg("Ваш ник изменен на " + token[1]);
+                                    this.nick = token[1];
+                                    server.broadcastClientList();
+                                } else {
+                                    sendMsg("Не удалось изменить ник. Ник " + token[1] + " уже существует");
+                                }
                             }
 
                         } else {

@@ -1,5 +1,6 @@
 package server;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -7,12 +8,13 @@ import java.sql.*;
 import java.util.List;
 import java.util.Vector;
 
-import static server.DbSimpleAuthService.*;
+
 
 public class Server {
     private List<ClientHandler> clients;
     private AuthService authService;
-    private DbSimpleAuthService dbSAS;
+
+
 
 
     public AuthService getAuthService() {
@@ -20,9 +22,13 @@ public class Server {
     }
 
     public Server() {
-        clients = new Vector<>();
-        authService = new DbSimpleAuthService();
 
+        clients = new Vector<>();
+//        authService = new SimpleAuthService();
+        if (!SQLHandler.connect()){
+            throw new RuntimeException("Не удалось подключиться к БД");
+        }
+        authService = new DBAuthService();
 
         ServerSocket server = null;
         Socket socket;
@@ -36,13 +42,6 @@ public class Server {
 
             while (true) {
                 socket = server.accept();
-                try {
-                    connect();
-                } catch (ClassNotFoundException e) {
-                    e.printStackTrace();
-                } catch (SQLException throwables) {
-                    throwables.printStackTrace();
-                }
                 System.out.println("Клиент подключился");
                 System.out.println("socket.getRemoteSocketAddress(): " + socket.getRemoteSocketAddress());
                 System.out.println("socket.getLocalSocketAddress() " + socket.getLocalSocketAddress());
@@ -51,7 +50,6 @@ public class Server {
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
-            disconnect();
             try {
                 server.close();
 
@@ -63,7 +61,7 @@ public class Server {
 
     void broadcastMsg(ClientHandler sender, String msg) {
         String message = String.format("%s : %s", sender.getNick(), msg);
-
+        MessageHistory.addMsgInHistory(sender.getNick(),message);
         for (ClientHandler client : clients) {
             client.sendMsg(message);
         }
@@ -75,7 +73,13 @@ public class Server {
         for (ClientHandler c : clients) {
             if(c.getNick().equals(receiver)){
                 c.sendMsg(message);
-                sender.sendMsg(message);
+                MessageHistory.addMsgInHistory(c.getLogin(),message);
+
+                if (!sender.getNick().equals(receiver)) {
+                    sender.sendMsg(message);
+                    MessageHistory.addMsgInHistory(sender.getLogin(),message);
+                }
+
                 return;
             }
         }
