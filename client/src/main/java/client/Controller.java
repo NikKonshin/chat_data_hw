@@ -25,6 +25,8 @@ import java.io.IOException;
 import java.net.Socket;
 import java.net.URL;
 import java.util.ResourceBundle;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class Controller implements Initializable {
     @FXML
@@ -58,6 +60,8 @@ public class Controller implements Initializable {
     private Stage regStage;
     RegController regController;
 
+    public static final Logger logger = Logger.getLogger("");
+
     public void setAuthenticated(boolean authenticated) {
         this.authenticated = authenticated;
         authPanel.setVisible(!authenticated);
@@ -80,7 +84,7 @@ public class Controller implements Initializable {
             stage.setOnCloseRequest(new EventHandler<WindowEvent>() {
                 @Override
                 public void handle(WindowEvent event) {
-                    System.out.println("bye");
+                    logger.log(Level.INFO,"bye");
                     if (socket != null && !socket.isClosed()) {
                         try {
                             out.writeUTF("/end");
@@ -162,7 +166,7 @@ public class Controller implements Initializable {
                         }
                     }
                 }catch (RuntimeException e)   {
-                    System.out.println(e.getMessage());
+                    logger.log(Level.INFO,e.getMessage());
                 } catch (IOException e) {
                     e.printStackTrace();
                 } finally {

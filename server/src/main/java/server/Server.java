@@ -7,12 +7,14 @@ import java.net.Socket;
 import java.sql.*;
 import java.util.List;
 import java.util.Vector;
-
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 
 public class Server {
     private List<ClientHandler> clients;
     private AuthService authService;
+    public static final Logger logger = Logger.getLogger("");
 
 
 
@@ -37,22 +39,24 @@ public class Server {
 
         try {
             server = new ServerSocket(PORT);
-            System.out.println("Сервер запущен!");
+            logger.log(Level.SEVERE,"Сервер запущен! ");
             //fillTable();
 
             while (true) {
                 socket = server.accept();
-                System.out.println("Клиент подключился");
-                System.out.println("socket.getRemoteSocketAddress(): " + socket.getRemoteSocketAddress());
-                System.out.println("socket.getLocalSocketAddress() " + socket.getLocalSocketAddress());
+
+                logger.log(Level.INFO,"Клиент подключился");
+                logger.log(Level.INFO,"socket.getRemoteSocketAddress(): " + socket.getRemoteSocketAddress());
+                logger.log(Level.INFO,"socket.getLocalSocketAddress() " + socket.getLocalSocketAddress());
+
                 new ClientHandler(this, socket);
             }
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
             try {
+                logger.log(Level.SEVERE,"Сервер завершил работу! ");
                 server.close();
-
             } catch (IOException e) {
                 e.printStackTrace();
             }
